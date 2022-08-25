@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>whether</title>
+    <link rel="stylesheet" href="/styles/css/bootstrap.min.css" />
+    <style>
+      .table td{
+          padding: 0.5em;
+      }
+    </style>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>    <!-- vue.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script><!-- Chart.js -->
+    <script type="module" src="/js/weather.js"></script>
+    <script th:inline="javascript">
+        $(function() {
+            var date = new Date();
+            var year = date.getFullYear();
+            var month = ("0" + (1 + date.getMonth())).slice(-2);
+            var day = ("0" + date.getDate()).slice(-2);
+            var today = year + month + day;
+
+            var jsonString = [[${jsonString}]];
+            var obj = JSON.parse(jsonString);
+            var items = obj.response.body.items.item;   // 배열
+
+            var tmpArr = [];
+            var skyArr = [];
+
+            for(var i = 0; i < items.length; i++){
+                // 오늘 날짜만 추출
+                if(items[i].fcstDate == today){
+
+                    // 해당 시간 기온
+                    if(items[i].category =="TMP"){
+                        console.log(items[i].fcstTime.substring(0,2) + " 시 예상기온 : " + items[i].fcstValue);
+                        tmpArr.push(items[i].fcstValue);
+                    }
+
+
+                    /*
+                    if(items[i].category =="SKY"){
+                        console.log(items[i].fcstTime.substring(0,2) + " 시 하늘상태 : " + items[i].fcstValue);
+                    }
+
+
+                      if(items[i].category =="PTY"){
+                        console.log(items[i].fcstTime.substring(0,2) + " 시 강수형태 : " + items[i].fcstValue);
+                    }
+                    */
+
+                    // 시간대 종합 날씨
+                    if(items[i].category =="PTY"){
+                        if(items[i].fcstValue == "0"){
+                            var weatherValue = items[i-1].fcstValue;
+                            var weatherStr = "";
+
+                            if(weatherValue == "1"){
+                                weatherStr = "맑음";
+                            }else if(weatherValue == "3"){
+                                weatherStr = "구름많음";
+                            }else{
+                                 weatherStr = "흐림";
+                            }
+
+                            console.log(items[i].fcstTime.substring(0,2) + " 시 하늘상태 : " + weatherStr);
+                            skyArr.push(weatherStr);
+
+                        }else{
+                            var weatherValue = items[i].fcstValue;
+                            var weatherStr = "";
+
+                            if(weatherValue == "0"){
+                                weatherStr = "없음";
+                            }else if(weatherValue == "1"){
+                                weatherStr = "비";
+                            }else if(weatherValue == "2"){
+                                weatherStr = "비/눈";
+                            }else if(weatherValue == "3"){
+                                weatherStr = "눈";
+                            }else if(weatherValue == "4"){
+                                weatherStr = "소나기";
+                            }
+                            skyArr.push(weatherStr);
+                        }
+                    }
+
+                }
+            }
+
+            console.log(tmpArr);
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['6시', '7시', '8시', '9시', '10시', '11시', '12시'
+                              ,  '13시', '14시', '15시', '16시', '17시', '18시'
+                              ,  '19시', '20시', '21시', '22시', '23시'
+                            ],
+                    datasets: [{
+                        label: '# 온도',
+                        data: tmpArr
+                    }]
+                },
+                options: {
+                    responsive: false
+                }
+            });
+
+            for(var i = 0; i < skyArr.length; i++){
+                var htmlStr = "<tr class='text-center'><td>" + (i+6)  + "시</td><td>" + skyArr[i] +"</td></tr>";
+                $("#sky").append(htmlStr);
+            }
+
+        });
+
+
+
+    </script>
+</head>
+
+<body>
+  <div id="app" class="container py-3">
+  	<!-- 각 컴포넌트 붙여줌 -->
+  	 <h1 class="display-4 fw-normal" th:text="${'서울특별시 강남구 논현동 ' + #calendars.format(#calendars.createNow(), 'yyyy-MM-dd') + ' 날씨'}"></h1>
+
+      <div style="width: 1200px; height: 450px; display: flex;">
+
+	 	<!--차트가 그려질 부분-->
+        <canvas id="myChart" width="900"></canvas>
+
+	 	<table class="table" style="margin-left: 30px;">
+			<thead class="thead-light">
+				<tr class="text-center">
+					<th>시간</th>
+					<th>날씨</th>
+				</tr>
+			</thead>
+			<tbody id="sky">
+			<!--
+				<tr>
+					<td></td>
+					<td></td>
+				</tr>
+			-->
+			</tbody>
+		</table>
+    </div>
+
+  </div>
+</body>
+</html>

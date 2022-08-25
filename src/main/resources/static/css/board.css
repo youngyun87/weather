@@ -1,0 +1,13 @@
+.calandar_img {width: 35px;}
+
+#pagination-div {
+	margin: auto;
+}
+
+.paging-div {
+  padding: 15px 0 5px 10px;
+  display: table;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}

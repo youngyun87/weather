@@ -1,0 +1,20 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+spring:
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+#logging
+logging:
+  logback:
+    rollingpolicy:
+      max-history: 30
+      max-file-size: 100MB
+      file-name-pattern: ${LOG_FILE}.%d{yyyy-MM-dd}-%i.log
+  file.name: logs/app.log
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS,Asia/Seoul
